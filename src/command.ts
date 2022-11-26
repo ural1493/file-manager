@@ -37,7 +37,7 @@ export const validators = {
     }
   },
   [ArgType.FOLDER]: (arg: string) => {
-    if (arg.split('.').length > 1) {
+    if (arg !== '.' && arg !== '..' && arg.split('.').length > 1) {
       throw new Error(arg + ' is not folder!')
     }
   }

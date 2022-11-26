@@ -3,8 +3,7 @@ import {ls} from "./ls";
 import {cd, up} from "./cd";
 import {getUsername} from "./utils";
 import {FnArgs} from "./command";
-import {cat} from "./cat";
-import {add, cp, rm, rn} from "./add";
+import {add, cp, mv, rm, rn, cat} from "./fsCommands";
 
 type Commands = Record<string, (...args: FnArgs) => void>
 
@@ -28,6 +27,7 @@ const commands: Commands = {
   rm,
   rn,
   cp,
+  mv,
   '.exit': () => {
     process.exit(0)
   }
