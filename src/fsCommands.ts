@@ -7,14 +7,10 @@ import os from "os";
 import {OperationFailedError} from "./utils";
 
 export const catHandler = async (filePath: string) => {
-  console.log('cat')
   const resultPath = path.resolve(currentFolderPath, filePath)
   try {
-    console.log('before access')
     await fs.promises.access(resultPath)
-    console.log('after access')
   } catch (e) {
-    console.log('cat catch')
     throw new OperationFailedError()
   }
   const rs = fs.createReadStream(resultPath)
