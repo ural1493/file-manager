@@ -1,17 +1,15 @@
 import * as fs from "fs";
 import path from "path";
-import {currentFolderPath} from "./index";
+import {currentFolderPath} from "../index";
 import {sortTable} from "./utils";
-import {createCommand} from "./command";
 
 export interface Table {
   Name: string
   Type: string
 }
 
-const lsHandler = async () => {
+export const lsHandler = async () => {
   const filesNames = await fs.promises.readdir(currentFolderPath)
-
 
   const result = await filesNames.reduce(async (acc, fileName) => {
     const accum = await acc
@@ -30,7 +28,3 @@ const lsHandler = async () => {
   const sorted = sortTable(result)
   console.table(sorted)
 }
-
-export const ls = createCommand({
-  handler: lsHandler
-})

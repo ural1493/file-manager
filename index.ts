@@ -1,13 +1,12 @@
 import * as path from "path";
-import {ls} from "./ls";
-import {cd, up} from "./cd";
-import {getUsername} from "./utils";
-import {FnArgs} from "./command";
-import {add, cp, mv, rm, rn, cat} from "./fsCommands";
+import {getUsername, InvalidInputError, OperationFailedError} from "./src/utils";
+import {fileManagerCommands, FnArgs} from "./src/command";
+// import OS from "src/os";
 
 type Commands = Record<string, (...args: FnArgs) => void>
 
-export const defaultPath = path.resolve('/')
+export const defaultPath = path.resolve('/PROGA/rs-nodejs/file-manager')
+// export const defaultPath = OS.homedir()
 export let currentFolderPath = defaultPath
 
 const username = getUsername()
@@ -18,20 +17,7 @@ if (username) {
   console.log(greetingMessage)
 }
 
-const commands: Commands = {
-  ls,
-  cd,
-  up,
-  cat,
-  add,
-  rm,
-  rn,
-  cp,
-  mv,
-  '.exit': () => {
-    process.exit(0)
-  }
-}
+const commands: Commands = fileManagerCommands
 
 const parseCommand = (command: string) => {
   command = command.trim()
@@ -41,10 +27,13 @@ const parseCommand = (command: string) => {
 const handleCommand = async (command: string | Buffer) => {
   const [com, ...args] = parseCommand(command.toString())
   try {
+    if (!commands[com]) throw new InvalidInputError()
     await commands[com](...args)
   } catch (e) {
-    console.log(e)
-    console.log('catch')
+    if(e instanceof InvalidInputError || e instanceof OperationFailedError) {
+      console.log(e.message)
+      return
+    }
   }
 }
 

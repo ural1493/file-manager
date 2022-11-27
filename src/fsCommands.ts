@@ -1,13 +1,22 @@
 import * as path from "path";
-import {currentFolderPath} from "./index";
-import {ArgType, cbWithFnArgs, createCommand, validators} from "./command";
+import {currentFolderPath} from "../index";
+import {ArgType, cbWithFnArgs, validators} from "./command";
 import * as fs from "fs";
 import {createReadStream, createWriteStream} from "fs";
 import os from "os";
+import {OperationFailedError} from "./utils";
 
-const catHandler = async (filePath: string) => {
+export const catHandler = async (filePath: string) => {
+  console.log('cat')
   const resultPath = path.resolve(currentFolderPath, filePath)
-  await fs.promises.access(resultPath) // TODO
+  try {
+    console.log('before access')
+    await fs.promises.access(resultPath)
+    console.log('after access')
+  } catch (e) {
+    console.log('cat catch')
+    throw new OperationFailedError()
+  }
   const rs = fs.createReadStream(resultPath)
   rs.pipe(process.stdout)
   rs.on('close', () => {
@@ -15,55 +24,40 @@ const catHandler = async (filePath: string) => {
   })
 }
 
-export const cat = createCommand({
-  args: [
-    {type: ArgType.FILE, required: true}
-  ],
-  handler: catHandler
-})
-
-const addHandler = async (filePath: string) => {
-  validators[ArgType.FILE](filePath) // TODO
+export const addHandler = async (filePath: string) => {
+  validators[ArgType.FILE](filePath)
   const resultPath = path.resolve(currentFolderPath, filePath)
-  await fs.promises.writeFile(resultPath, '') // TODO
+  try {
+    await fs.promises.writeFile(resultPath, '', {flag: 'wx'})
+  } catch (e) {
+    throw new OperationFailedError()
+  }
 }
 
-export const add = createCommand({
-  args: [
-    {type: ArgType.FILE, required: true}
-  ],
-  handler: addHandler
-})
-
-const rmHandler = async (filePath: string) => {
-  validators[ArgType.FILE](filePath) // TODO
+export const rmHandler = async (filePath: string) => {
+  validators[ArgType.FILE](filePath)
   const resultPath = path.resolve(currentFolderPath, filePath)
-  await fs.promises.unlink(resultPath) // TODO
+  try {
+    await fs.promises.access(resultPath)
+    await fs.promises.unlink(resultPath)
+  } catch (e) {
+    throw new OperationFailedError()
+  }
 }
 
-export const rm = createCommand({
-  args: [
-    {type: ArgType.FILE, required: true}
-  ],
-  handler: rmHandler
-})
-
-const rnHandler: cbWithFnArgs = async (...args) => {
+export const rnHandler: cbWithFnArgs = async (...args) => {
   const [prev, next] = args
   const prevPath = path.resolve(currentFolderPath, prev)
   const nextPath = path.resolve(currentFolderPath, next)
-  await fs.promises.rename(prevPath, nextPath) // TODO
+  try {
+    await fs.promises.access(prevPath)
+    await fs.promises.rename(prevPath, nextPath) // TODO
+  } catch (e) {
+    throw new OperationFailedError()
+  }
 }
 
-export const rn = createCommand({
-  args: [
-    {type: ArgType.FILE, required: true},
-    {type: ArgType.FILE, required: true}
-  ],
-  handler: rnHandler
-})
-
-const cpHandler: cbWithFnArgs = async (...args) => {
+export const cpHandler: cbWithFnArgs = async (...args) => {
   const [filename, dirname] = args
   const filenamePath = path.resolve(currentFolderPath, filename)
   const dirnamePath = path.resolve(currentFolderPath, dirname)
@@ -71,7 +65,11 @@ const cpHandler: cbWithFnArgs = async (...args) => {
   let isExist = false
   let newCopyFilename
 
-  // cd PROGA/rs-nodejs/file-manager
+  try {
+    await fs.promises.access(filenamePath)
+  } catch (e) {
+    throw new OperationFailedError()
+  }
 
   try {
     await fs.promises.access(newFilename)
@@ -95,14 +93,6 @@ const cpHandler: cbWithFnArgs = async (...args) => {
   })
 }
 
-export const cp = createCommand({
-  args: [
-    {type: ArgType.FILE, required: true},
-    {type: ArgType.FOLDER, required: true}
-  ],
-  handler: cpHandler
-})
-
 const fromCpToMv = (cb: cbWithFnArgs): cbWithFnArgs => async (...args) => {
   const [filename] = args
   const filenamePath = path.resolve(currentFolderPath, filename)
@@ -110,12 +100,4 @@ const fromCpToMv = (cb: cbWithFnArgs): cbWithFnArgs => async (...args) => {
   await fs.promises.unlink(filenamePath)
 }
 
-const mvHandler: cbWithFnArgs = fromCpToMv(cpHandler)
-
-export const mv = createCommand({
-  args: [
-    {type: ArgType.FILE, required: true},
-    {type: ArgType.FOLDER, required: true}
-  ],
-  handler: mvHandler
-})
+export const mvHandler: cbWithFnArgs = fromCpToMv(cpHandler)

@@ -1,5 +1,5 @@
 import {Table} from "./ls";
-import {currentFolderPath} from "./index";
+import {currentFolderPath} from "../index";
 import {cbWithFnArgs, FnArgs} from "./command";
 
 const USERNAME_OPTION = '--username'
@@ -14,20 +14,36 @@ export const sortTable = (arr: Table[]) =>
 
 export const getUsername = () => {
   const vars = process.argv.slice(2)
-  const usernameArr: string | undefined = vars.find((option) => option.startsWith(USERNAME_OPTION))
+  const usernameArr = vars.find((option) => option.startsWith(USERNAME_OPTION))
   return usernameArr?.split('=').pop()
 }
 
-export const logCurrentDirWrapper = (cb: cbWithFnArgs) => async (...args: FnArgs) => {
-  await cb(...args)
+export const logCurrentDirWrapper = (cb: cbWithFnArgs) => (...args: FnArgs) => {
+  cb(...args)
   console.log(`You are currently in ${currentFolderPath}`)
 }
 
 
-export const fnErrWrapper = (cb: cbWithFnArgs) => {
+export const fnErrWrapper = (cb: cbWithFnArgs): cbWithFnArgs => async (...args) => {
   try {
-    return cb()
+    await cb(...args)
   } catch (e) {
+    if(e instanceof InvalidInputError || e instanceof OperationFailedError) {
+      console.log(e.message)
+      return
+    }
     throw e
+  }
+}
+
+export class InvalidInputError extends Error {
+  constructor() {
+    super('Invalid input');
+  }
+}
+
+export class OperationFailedError extends Error {
+  constructor() {
+    super('Operation failed');
   }
 }
