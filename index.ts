@@ -1,12 +1,12 @@
-import * as path from "path";
+// import * as path from "path";
 import {getUsername, InvalidInputError, OperationFailedError} from "./src/utils";
 import {fileManagerCommands, FnArgs} from "./src/command";
-// import OS from "src/os";
+import OS from "os";
 
 type Commands = Record<string, (...args: FnArgs) => void>
 
-export const defaultPath = path.resolve('/PROGA/rs-nodejs/file-manager')
-// export const defaultPath = OS.homedir()
+// export const defaultPath = path.resolve('/PROGA/rs-nodejs/file-manager')
+export const defaultPath = OS.homedir()
 export let currentFolderPath = defaultPath
 
 const username = getUsername()
