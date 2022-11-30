@@ -1,0 +1,21 @@
+{
+  "name": "file-manager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js -- --username=My_favorite_user"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ural1493/file-manager.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ural1493/file-manager/issues"
+  },
+  "homepage": "https://github.com/ural1493/file-manager#readme"
+}

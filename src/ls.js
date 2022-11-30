@@ -1,20 +1,15 @@
-import * as fs from "fs";
+import fs from "fs";
 import path from "path";
-import {currentFolderPath} from "../index";
-import {sortTable} from "./utils";
-
-export interface Table {
-  Name: string
-  Type: string
-}
+import {state} from "../index.js";
+import {sortTable} from "./utils.js";
 
 export const lsHandler = async () => {
-  const filesNames = await fs.promises.readdir(currentFolderPath)
+  const filesNames = await fs.promises.readdir(state.currentFolderPath)
 
   const result = await filesNames.reduce(async (acc, fileName) => {
     const accum = await acc
     try {
-      const isFile = (await fs.promises.stat(path.join(currentFolderPath, fileName))).isFile()
+      const isFile = (await fs.promises.stat(path.join(state.currentFolderPath, fileName))).isFile()
       accum.push({
         Name: fileName,
         Type: isFile ? 'file' : 'directory'
@@ -23,7 +18,7 @@ export const lsHandler = async () => {
     } catch (e) {
       return accum
     }
-  }, Promise.resolve<Table[]>([]))
+  }, Promise.resolve([]))
 
   const sorted = sortTable(result)
   console.table(sorted)

@@ -1,58 +1,44 @@
-import {fnErrWrapper, InvalidInputError, logCurrentDirWrapper} from "./utils";
-import {osHandler} from "./os";
-import {addHandler, catHandler, cpHandler, mvHandler, rmHandler, rnHandler} from "./fsCommands";
-import {cdHandler, upHandler} from "./cd";
-import {lsHandler} from "./ls";
-import {hashHandle} from "./hash";
-import {compressHandler, decompressHandler} from "./zip";
+import {fnErrWrapper, InvalidInputError, logCurrentDirWrapper} from "./utils.js";
+import {osHandler} from "./os.js";
+import {addHandler, catHandler, cpHandler, mvHandler, rmHandler, rnHandler} from "./fsCommands.js";
+import {cdHandler, upHandler} from "./cd.js";
+import {lsHandler} from "./ls.js";
+import {hashHandle} from "./hash.js";
+import {compressHandler, decompressHandler} from "./zip.js";
 
-export enum ArgType {
-  FILE = 'file',
-  FOLDER = 'folder',
-  OPTION = 'option',
+export const ArgType = {
+  FILE: 'file',
+  FOLDER: 'folder',
+  OPTION: 'option',
 }
 
-export type FnArgs = string[]
-export type cbWithFnArgs = (...args: FnArgs) => void | Promise<void>
-
-export interface Arg {
-  type: ArgType
-  required?: boolean
-}
-
-export interface Options {
-  args?: Arg[]
-  showCurrentDirAfterExec?: boolean
-  handler: cbWithFnArgs
-}
-
-const defaultOptions: Options = {
+const defaultOptions = {
   showCurrentDirAfterExec: true,
   args: undefined,
-  handler: (...args: FnArgs) => {
+  handler: (...args) => {
   }
 }
 
 export const validators = {
-  [ArgType.FILE]: (arg: string) => {
-    if (arg.split('.').length < 2) {
-      throw new InvalidInputError()
+  [ArgType.FILE]: (arg) => {
+    if (arg.split('.').filter(Boolean).length < 2) {
+      throw new InvalidInputError('argument must be a file')
     }
   },
-  [ArgType.OPTION]: (arg: string) => {
+  [ArgType.OPTION]: (arg) => {
     if (!arg.startsWith('--')) {
-      throw new InvalidInputError()
+      throw new InvalidInputError('argument must be an option')
     }
   },
-  [ArgType.FOLDER]: (arg: string) => {
+  [ArgType.FOLDER]: (arg) => {
     if (arg !== '.' && arg !== '..' && arg.split('.').filter(Boolean).length > 1) {
-      throw new InvalidInputError()
+      throw new InvalidInputError('argument must be a folder')
     }
   }
 }
 
-const validate = (cb: Options['handler'], argOptions?: Arg[]): Options['handler'] =>
-  async (...args: FnArgs) => {
+const validate = (cb, argOptions) =>
+  async (...args) => {
     argOptions?.forEach(({required, type}, i) => {
       const currentArg = args[i]
       if (required && !currentArg) {
@@ -63,7 +49,7 @@ const validate = (cb: Options['handler'], argOptions?: Arg[]): Options['handler'
     await cb(...args)
   }
 
-export const createCommand = (options: Options) => {
+export const createCommand = (options) => {
   const opts = {...defaultOptions, ...options}
   const {showCurrentDirAfterExec, args, handler} = opts
 
@@ -74,16 +60,16 @@ export const createCommand = (options: Options) => {
   return validate(res, args)
 }
 
-type Config = Record<string, Options>
-
-const config: Config = {
+const config = {
   'up': {
     handler: upHandler,
+    showCurrentDirAfterExec: false,
   },
   'cd': {
     args: [
       {type: ArgType.FOLDER, required: true}
     ],
+    showCurrentDirAfterExec: false,
     handler: cdHandler
   },
   'ls': {
@@ -159,8 +145,8 @@ const config: Config = {
   }
 }
 
-const createCommands = (config: Config) => {
-  const commands: Record<string, cbWithFnArgs> = {}
+const createCommands = (config) => {
+  const commands = {}
 
   Object.entries(config).forEach(([commandName, options]) => {
     commands[commandName] = createCommand(options)

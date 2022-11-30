@@ -1,11 +1,11 @@
 import path from "path";
 import fs from "fs";
 import {createHash} from "crypto";
-import {currentFolderPath} from "../index";
-import {OperationFailedError} from "./utils";
+import {state} from "../index.js";
+import {OperationFailedError} from "./utils.js";
 
-export const hashHandle = async (filePath: string) => {
-  const file = path.resolve(currentFolderPath, filePath)
+export const hashHandle = async (filePath) => {
+  const file = path.resolve(state.currentFolderPath, filePath)
   try {
     await fs.promises.access(file)
   } catch (e) {

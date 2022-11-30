@@ -1,12 +1,11 @@
-import * as path from "path";
-import {currentFolderPath} from "../index";
-import {ArgType, cbWithFnArgs, validators} from "./command";
-import * as fs from "fs";
-import {createReadStream, createWriteStream} from "fs";
+import path from "path";
+import fs from "fs";
 import os from "os";
-import {OperationFailedError} from "./utils";
+import {state} from "../index.js";
+import {ArgType, validators} from "./command.js";
+import {OperationFailedError} from "./utils.js";
 
-export const catHandler = async (filePath: string) => {
+export const catHandler = async (filePath) => {
   const resultPath = path.resolve(currentFolderPath, filePath)
   try {
     await fs.promises.access(resultPath)
@@ -20,9 +19,9 @@ export const catHandler = async (filePath: string) => {
   })
 }
 
-export const addHandler = async (filePath: string) => {
+export const addHandler = async (filePath) => {
   validators[ArgType.FILE](filePath)
-  const resultPath = path.resolve(currentFolderPath, filePath)
+  const resultPath = path.resolve(state.currentFolderPath, filePath)
   try {
     await fs.promises.writeFile(resultPath, '', {flag: 'wx'})
   } catch (e) {
@@ -30,9 +29,9 @@ export const addHandler = async (filePath: string) => {
   }
 }
 
-export const rmHandler = async (filePath: string) => {
+export const rmHandler = async (filePath) => {
   validators[ArgType.FILE](filePath)
-  const resultPath = path.resolve(currentFolderPath, filePath)
+  const resultPath = path.resolve(state.currentFolderPath, filePath)
   try {
     await fs.promises.access(resultPath)
     await fs.promises.unlink(resultPath)
@@ -41,25 +40,31 @@ export const rmHandler = async (filePath: string) => {
   }
 }
 
-export const rnHandler: cbWithFnArgs = async (...args) => {
+export const rnHandler = async (...args) => {
   const [prev, next] = args
-  const prevPath = path.resolve(currentFolderPath, prev)
-  const nextPath = path.resolve(currentFolderPath, next)
+  const prevPath = path.resolve(state.currentFolderPath, prev)
+  const nextPath = path.resolve(state.currentFolderPath, next)
   try {
     await fs.promises.access(prevPath)
-    await fs.promises.rename(prevPath, nextPath) // TODO
+    await fs.promises.rename(prevPath, nextPath)
   } catch (e) {
     throw new OperationFailedError()
   }
 }
 
-export const cpHandler: cbWithFnArgs = async (...args) => {
+export const cpHandler = async (...args) => {
   const [filename, dirname] = args
-  const filenamePath = path.resolve(currentFolderPath, filename)
-  const dirnamePath = path.resolve(currentFolderPath, dirname)
+  const filenamePath = path.resolve(state.currentFolderPath, filename)
+  const dirnamePath = path.resolve(state.currentFolderPath, dirname)
   const newFilename = path.resolve(dirnamePath, filename)
   let isExist = false
   let newCopyFilename
+debugger
+  console.log({
+    filenamePath,
+    dirnamePath,
+    newFilename
+  })
 
   try {
     await fs.promises.access(filenamePath)
@@ -77,23 +82,24 @@ export const cpHandler: cbWithFnArgs = async (...args) => {
     const arr = filename.split('.')
     const ext = arr.pop()
     arr[arr.length - 1] += '(copy)'
-    newCopyFilename = [...arr, ext].join('.')
+    const copyFilename = [...arr, ext].join('.')
+    newCopyFilename = path.resolve(dirnamePath, copyFilename)
   }
 
-  const rs = createReadStream(filenamePath)
-  const ws = createWriteStream(newCopyFilename || newFilename)
+  const rs = fs.createReadStream(filenamePath)
+  const ws = fs.createWriteStream(isExist ? newCopyFilename : newFilename)
   rs.pipe(ws)
 
-  return new Promise<void>((res) => {
+  return new Promise((res) => {
     rs.on('close', res)
   })
 }
 
-const fromCpToMv = (cb: cbWithFnArgs): cbWithFnArgs => async (...args) => {
+const fromCpToMv = (cb) => async (...args) => {
   const [filename] = args
-  const filenamePath = path.resolve(currentFolderPath, filename)
+  const filenamePath = path.resolve(state.currentFolderPath, filename)
   await cb(...args)
   await fs.promises.unlink(filenamePath)
 }
 
-export const mvHandler: cbWithFnArgs = fromCpToMv(cpHandler)
+export const mvHandler = fromCpToMv(cpHandler)

@@ -1,9 +1,7 @@
 import OS from "os";
-import {InvalidInputError} from "./utils";
+import {InvalidInputError} from "./utils.js";
 
-type OsOptions = Record<string, () => void>
-
-export const osOptions: OsOptions = {
+export const osOptions = {
   ['--EOL']: () => console.log(JSON.stringify(OS.EOL)),
   ['--cpus']: () => console.log(OS.cpus()),
   ['--homedir']: () => console.log(OS.homedir()),
@@ -11,7 +9,7 @@ export const osOptions: OsOptions = {
   ['--architecture']: () => console.log(OS.arch()),
 }
 
-export const osHandler = async (option: string) => {
+export const osHandler = async (option) => {
   try {
     await osOptions[option]()
   } catch (e) {
