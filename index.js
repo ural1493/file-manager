@@ -1,9 +1,8 @@
-import path from "path";
 import OS from "os";
+import * as readline from 'node:readline/promises';
 import {getUsername, InvalidInputError, OperationFailedError} from "./src/utils.js";
 import {fileManagerCommands} from "./src/command.js";
 
-// export const defaultPath = path.resolve('/PROGA/rs-nodejs/file-manager')
 export const defaultPath = OS.homedir()
 export const state = {
   currentFolderPath: defaultPath
@@ -19,10 +18,7 @@ if (username) {
 
 const commands = fileManagerCommands
 
-const parseCommand = (command) => {
-  command = command.trim()
-  return command.split(' ')
-}
+const parseCommand = (command) => command.split(' ')
 
 const handleCommand = async (command) => {
   const [com, ...args] = parseCommand(command.toString())
@@ -38,11 +34,9 @@ const handleCommand = async (command) => {
 
 const handleExit = () => console.log(byeMessage)
 
-process.stdin.on('data', handleCommand)
+const rl = readline.createInterface({ input: process.stdin });
 
-process.on('SIGINT', () => {
-  handleExit()
-})
-process.on('exit', () => {
-  handleExit()
-})
+rl.on('line', handleCommand)
+
+process.on('SIGINT', handleExit)
+process.on('exit', handleExit)

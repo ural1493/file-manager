@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs";
 import {createBrotliCompress, createBrotliDecompress} from "zlib";
 import {state} from "../index.js";
-import {OperationFailedError} from "./utils.js";
+import {checkExistance} from "./utils.js";
 
 export const compressHandler = async (...args) => {
   const [filename, dirname] = args
@@ -10,12 +10,7 @@ export const compressHandler = async (...args) => {
   const dirnamePath = path.resolve(state.currentFolderPath, dirname)
   const newFilename = path.resolve(dirnamePath, filename + '.br')
 
-  try {
-    await fs.promises.access(filenamePath)
-    await fs.promises.access(newFilename)
-  } catch (e) {
-    throw new OperationFailedError()
-  }
+  await checkExistance(filenamePath)
 
   const rs = fs.createReadStream(filenamePath)
   const ws = fs.createWriteStream(newFilename)
@@ -34,12 +29,7 @@ export const decompressHandler = async (...args) => {
   const dirnamePath = path.resolve(state.currentFolderPath, dirname)
   const newFilename = path.resolve(dirnamePath, filename).split('.').slice(0, -1).join('.')
 
-  try {
-    await fs.promises.access(filenamePath)
-    await fs.promises.access(newFilename)
-  } catch (e) {
-    throw new OperationFailedError()
-  }
+  await checkExistance(filenamePath)
 
   const rs = fs.createReadStream(filenamePath)
   const ws = fs.createWriteStream(newFilename)

@@ -22,17 +22,17 @@ const defaultOptions = {
 export const validators = {
   [ArgType.FILE]: (arg) => {
     if (arg.split('.').filter(Boolean).length < 2) {
-      throw new InvalidInputError('argument must be a file')
+      throw new InvalidInputError()
     }
   },
   [ArgType.OPTION]: (arg) => {
     if (!arg.startsWith('--')) {
-      throw new InvalidInputError('argument must be an option')
+      throw new InvalidInputError()
     }
   },
   [ArgType.FOLDER]: (arg) => {
     if (arg !== '.' && arg !== '..' && arg.split('.').filter(Boolean).length > 1) {
-      throw new InvalidInputError('argument must be a folder')
+      throw new InvalidInputError()
     }
   }
 }

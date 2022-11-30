@@ -1,4 +1,6 @@
+import path from "path";
 import {state} from "../index.js";
+import fs from "fs";
 
 const USERNAME_OPTION = '--username'
 
@@ -34,13 +36,27 @@ export const fnErrWrapper = (cb) => async (...args) => {
 }
 
 export class InvalidInputError extends Error {
-  constructor(message) {
-    super(`Invalid input: ${message}`);
+  constructor() {
+    super('Invalid input');
   }
 }
 
 export class OperationFailedError extends Error {
   constructor() {
     super('Operation failed');
+  }
+}
+
+export const addSuffixToFilename = (filenamePath, suffix) => {
+  const {dir, name, ext} = path.parse(filenamePath)
+  const newFilePath = name + suffix + ext
+  return path.join(dir, newFilePath)
+}
+
+export const checkExistance = async (filenamePath) => {
+  try {
+    await fs.promises.access(filenamePath)
+  } catch (e) {
+    throw new OperationFailedError()
   }
 }

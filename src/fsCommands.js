@@ -3,10 +3,10 @@ import fs from "fs";
 import os from "os";
 import {state} from "../index.js";
 import {ArgType, validators} from "./command.js";
-import {OperationFailedError} from "./utils.js";
+import {addSuffixToFilename, OperationFailedError} from "./utils.js";
 
 export const catHandler = async (filePath) => {
-  const resultPath = path.resolve(currentFolderPath, filePath)
+  const resultPath = path.resolve(state.currentFolderPath, filePath)
   try {
     await fs.promises.access(resultPath)
   } catch (e) {
@@ -59,12 +59,6 @@ export const cpHandler = async (...args) => {
   const newFilename = path.resolve(dirnamePath, filename)
   let isExist = false
   let newCopyFilename
-debugger
-  console.log({
-    filenamePath,
-    dirnamePath,
-    newFilename
-  })
 
   try {
     await fs.promises.access(filenamePath)
@@ -79,11 +73,7 @@ debugger
   }
 
   if (isExist) {
-    const arr = filename.split('.')
-    const ext = arr.pop()
-    arr[arr.length - 1] += '(copy)'
-    const copyFilename = [...arr, ext].join('.')
-    newCopyFilename = path.resolve(dirnamePath, copyFilename)
+    newCopyFilename = addSuffixToFilename(filenamePath, '(copy)')
   }
 
   const rs = fs.createReadStream(filenamePath)
