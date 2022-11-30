@@ -3,7 +3,7 @@ import {InvalidInputError} from "./utils.js";
 
 export const osOptions = {
   ['--EOL']: () => console.log(JSON.stringify(OS.EOL)),
-  ['--cpus']: () => console.log(OS.cpus()),
+  ['--cpus']: () => console.log(OS.cpus().map(({model, speed}) => ({model, speed}))),
   ['--homedir']: () => console.log(OS.homedir()),
   ['--username']: () => console.log(OS.userInfo().username),
   ['--architecture']: () => console.log(OS.arch()),

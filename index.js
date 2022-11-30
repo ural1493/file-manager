@@ -26,15 +26,14 @@ const handleCommand = async (command) => {
     if (!commands[com]) throw new InvalidInputError()
     await commands[com](...args)
   } catch (e) {
-    if (e instanceof InvalidInputError || e instanceof OperationFailedError) {
-      console.log(e.message)
-    }
+    if (e instanceof InvalidInputError) return console.log(e.message)
+    console.log(e)
   }
 }
 
 const handleExit = () => console.log(byeMessage)
 
-const rl = readline.createInterface({ input: process.stdin });
+const rl = readline.createInterface({input: process.stdin});
 
 rl.on('line', handleCommand)
 
