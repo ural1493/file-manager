@@ -53,8 +53,6 @@ export const createCommand = (options) => {
   const opts = {...defaultOptions, ...options}
   const {showCurrentDirAfterExec, args, handler} = opts
 
-  // const tryCatchHandler = fnErrWrapper(handler)
-
   const h = fnErrWrapper(validate(handler, args))
 
   return showCurrentDirAfterExec ? logCurrentDirWrapper(h) : h
