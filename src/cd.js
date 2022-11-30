@@ -5,7 +5,6 @@ import {InvalidInputError} from "./utils.js";
 
 export const cdHandler = async (...args) => {
   const newPath = path.resolve(state.currentFolderPath, ...args)
-  console.log({newPath, args})
   try {
     await fs.promises.access(newPath)
     state.currentFolderPath = newPath
