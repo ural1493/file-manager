@@ -1,6 +1,6 @@
 import OS from "os";
-import * as readline from 'node:readline/promises';
-import {getUsername, InvalidInputError, OperationFailedError} from "./src/utils.js";
+import readline from 'node:readline';
+import {getUsername, InvalidInputError} from "./src/utils.js";
 import {fileManagerCommands} from "./src/command.js";
 
 export const defaultPath = OS.homedir()
