@@ -17,6 +17,12 @@ export const getUsername = () => {
   return usernameArr?.split('=').pop()
 }
 
+export const compose = (...fns) => {
+  let result
+  fns.reverse().filter(Boolean).forEach((fn) => result = result ? fn(result) : fn)
+  return result
+}
+
 export const logCurrentDirWrapper = (cb) => async (...args) => {
   await cb(...args)
   console.log(`You are currently in ${state.currentFolderPath}`)

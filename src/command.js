@@ -1,4 +1,4 @@
-import {fnErrWrapper, InvalidInputError, logCurrentDirWrapper} from "./utils.js";
+import {compose, fnErrWrapper, InvalidInputError, logCurrentDirWrapper} from "./utils.js";
 import {osHandler} from "./os.js";
 import {addHandler, catHandler, cpHandler, mvHandler, rmHandler, rnHandler} from "./fsCommands.js";
 import {cdHandler, upHandler} from "./cd.js";
@@ -37,25 +37,24 @@ export const validators = {
   }
 }
 
-const validate = (cb, argOptions) =>
-  async (...args) => {
-    argOptions?.forEach(({required, type}, i) => {
-      const currentArg = args[i]
-      if (required && !currentArg) {
-        throw new InvalidInputError()
-      }
-      validators[type](currentArg)
-    })
-    await cb(...args)
-  }
+const validateWrapper = (cb, argOptions) => async (...args) => {
+  argOptions?.forEach(({required, type}, i) => {
+    const currentArg = args[i]
+    if (required && !currentArg) {
+      throw new InvalidInputError()
+    }
+    validators[type](currentArg)
+  })
+  await cb(...args)
+}
 
 export const createCommand = (options) => {
   const opts = {...defaultOptions, ...options}
   const {showCurrentDirAfterExec, args, handler} = opts
 
-  const wrappedHandler = fnErrWrapper(validate(handler, args))
+  const logWrapper = showCurrentDirAfterExec ? logCurrentDirWrapper : undefined
 
-  return showCurrentDirAfterExec ? logCurrentDirWrapper(wrappedHandler) : wrappedHandler
+  return compose(logWrapper, fnErrWrapper, validateWrapper(handler, args))
 }
 
 const config = {
