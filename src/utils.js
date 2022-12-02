@@ -59,7 +59,7 @@ export const addSuffixToFilename = (filenamePath, suffix) => {
   return path.join(dir, newFilePath)
 }
 
-export const checkExistance = async (filenamePath) => {
+export const checkExistence = async (filenamePath) => {
   try {
     await fs.promises.access(filenamePath)
   } catch (e) {

@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs";
 import {createBrotliCompress, createBrotliDecompress} from "zlib";
 import {state} from "../index.js";
-import {checkExistance} from "./utils.js";
+import {checkExistence} from "./utils.js";
 
 export const compressHandler = async (...args) => {
   const [filename, dirname] = args
@@ -10,7 +10,7 @@ export const compressHandler = async (...args) => {
   const dirnamePath = path.resolve(state.currentFolderPath, dirname)
   const newFilename = path.resolve(dirnamePath, filename + '.br')
 
-  await checkExistance(filenamePath)
+  await checkExistence(filenamePath)
 
   const rs = fs.createReadStream(filenamePath)
   const ws = fs.createWriteStream(newFilename)
@@ -29,7 +29,7 @@ export const decompressHandler = async (...args) => {
   const dirnamePath = path.resolve(state.currentFolderPath, dirname)
   const newFilename = path.resolve(dirnamePath, filename).split('.').slice(0, -1).join('.')
 
-  await checkExistance(filenamePath)
+  await checkExistence(filenamePath)
 
   const rs = fs.createReadStream(filenamePath)
   const ws = fs.createWriteStream(newFilename)
